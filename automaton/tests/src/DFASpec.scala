@@ -35,7 +35,7 @@ object DFASpec extends TestSuite {
     }
     test("nfa generated dfa"){
 
-      DFA(simpleNFA).transition.foreach(println(_))
+      simpleNFA.cleanEpsilonTransition.transition.foreach(println)
       simpleNFA.accepts("aab")
 //      nfaGeneratedDFA.accepts("aab")
     }

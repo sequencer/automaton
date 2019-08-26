@@ -20,6 +20,14 @@ case class NFA[State, Symbol](initialState: State,
   def alphabet: Set[Symbol] = transition.keys.map(_._2).filter(_.isDefined).map(_.get).toSet
   def states: Set[State] = Set(initialState) ++ transition.keys.map(_._1).toSet ++ transition.values.flatten.toSet ++ finalStates
 
+  def cleanEpsilonTransition: NFA[Set[State], Symbol] = new NFA[Set[State], Symbol](
+    initialState = epsilonClosure(initialState),
+    transition = states.flatMap(state => alphabet.map(word => {
+      val stateEpsilonClosure: Set[State] = epsilonClosure(state)
+      ((stateEpsilonClosure, Some(word)), move(stateEpsilonClosure, Some(word)).map(epsilonClosure))
+    })).filter(_._2.nonEmpty).toMap,
+    finalStates = finalStates.map(epsilonClosure)
+  )
   /**
    * @param states is a set of state, represent a epsilon closure.
    * @param word is a word in alphabet.
