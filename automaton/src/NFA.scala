@@ -17,13 +17,16 @@ import scala.annotation.tailrec
 case class NFA[State, Symbol](initialState: State,
                               transition: Map[(State, Option[Symbol]), Set[State]],
                               finalStates: Set[State]) {
+  def alphabet: Set[Symbol] = transition.keys.map(_._2).filter(_.isDefined).map(_.get).toSet
+  def states: Set[State] = Set(initialState) ++ transition.keys.map(_._1).toSet ++ transition.values.flatten.toSet ++ finalStates
+
   /**
    * @param states is a set of state, represent a epsilon closure.
    * @param word is a word in alphabet.
    * @return a set of states which can be transited by word.
    * */
   def move(states: Set[State], word: Option[Symbol]): Set[State] = {
-    states.flatMap(s => transition(s, word)) ++ states
+    states.flatMap(s => transition.getOrElse((s, word), Set[State]()))
   }
 
   /**
@@ -32,8 +35,8 @@ case class NFA[State, Symbol](initialState: State,
    * @param words the remain word to be processed, the first word in words will be consumed,
    *              use generated state and remain words for iteration
    * */
-  def run(states: Set[State], words: List[Symbol]): Set[State] = {
-    words match {
+  def run(states: Set[State], words: Seq[Symbol]): Set[State] = {
+    words.toList match {
       case word :: wordTail => run(move(states, Some(word)), wordTail)
       case Nil => states
     }
@@ -43,7 +46,7 @@ case class NFA[State, Symbol](initialState: State,
    * @param words is a list of Symbol, send to NFA in sequence,
    *              find if it can be accepted by this [[NFA]]
    * */
-  def accepts(words: List[Symbol]): Boolean = run(Set(initialState), words).subsetOf(finalStates)
+  def accepts(words: Seq[Symbol]): Boolean = run(Set(initialState), words).subsetOf(finalStates)
 
   /**
    * return a epsilon closure of a input state.
@@ -58,7 +61,7 @@ case class NFA[State, Symbol](initialState: State,
    * */
   @tailrec
   private def epsilonClosure(states: Set[State]): Set[State] = {
-    val newStates: Set[State] = move(states, None)
+    val newStates: Set[State] = move(states, None) ++ states
     if(newStates == states) {
       states
     } else {

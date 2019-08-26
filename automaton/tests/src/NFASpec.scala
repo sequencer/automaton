@@ -1,4 +1,4 @@
-package automaton.test
+package automaton.tests
 
 import automaton._
 
