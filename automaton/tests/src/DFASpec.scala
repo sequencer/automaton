@@ -14,7 +14,7 @@ object DFASpec extends TestSuite {
     ),
     finalStates = Set(3))
 
-  val simpleNFA: NFA[Int, Char] = NFA(
+  val simpleENFA: eNFA[Int, Char] = eNFA(
     initialState = 0,
     transition = Map(
       (0, None) -> Set(1, 7),
@@ -33,11 +33,8 @@ object DFASpec extends TestSuite {
     test("simpleDFA can accept b as the last word."){
       simpleDFA.accepts("aaaaaaaaaaaaab")
     }
-    test("nfa generated dfa"){
-
-      simpleNFA.cleanEpsilonTransition.transition.foreach(println)
-      simpleNFA.accepts("aab")
-//      nfaGeneratedDFA.accepts("aab")
+    test("nfa generated dfa and accept aab"){
+      simpleENFA.nfa.dfa.accepts("aab")
     }
   }
 }

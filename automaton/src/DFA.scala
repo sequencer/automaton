@@ -38,19 +38,3 @@ case class DFA[State, Symbol](initialState: State,
     finalStates.contains(run(initialState, words))
   }
 }
-
-object DFA {
-  /**
-   * generate DFA by NFA,
-   * notice the type of DFA State is Set[State],
-   * because DFA state is a epsilon closure in NFA
-   * */
-  def apply[State, Symbol](nfa: NFA[State, Symbol]): DFA[Set[State], Symbol] = DFA(
-    initialState = nfa.epsilonClosure(nfa.initialState),
-    transition = nfa.states.flatMap(state => nfa.alphabet.map(word => {
-      val stateEpsilonClosure: Set[State] = nfa.epsilonClosure(state)
-      ((stateEpsilonClosure, word), nfa.move(stateEpsilonClosure, Some(word)))
-    })).filter(_._2.nonEmpty).toMap,
-    finalStates = nfa.finalStates.map(nfa.epsilonClosure)
-  )
-}
